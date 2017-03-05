@@ -22,4 +22,4 @@ LeftTableViewController *leftVC = [LeftTableViewController new];
 
 相对于网上其他DEMO来说，本例是利用了控制器转场实现的，其他DEMO基本都是View上加侧滑View，这样的话两个界面之间耦合度太高，两个View都归一个C管，不能忍~~~本例就是两个控制器，各管各的业务。
 
-![DYWatchLoadingAnimateGIF](DYWatchLoadingAnimateGIF.gif)
+![DYLeftSlipManagerGIF](DYLeftSlipManagerGIF.gif)
