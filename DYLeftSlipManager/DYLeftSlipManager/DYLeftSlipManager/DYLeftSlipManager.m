@@ -86,8 +86,10 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
     [self.coverVC presentViewController:self.leftVC animated:YES completion:nil];
 }
 
-- (void)dismissLeft {
-    [self.leftVC dismissViewControllerAnimated:YES completion:nil];
+- (void)dismissLeftView {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.leftVC dismissViewControllerAnimated:YES completion:nil];
+    });
 }
 
 #pragma mark - 手势处理方法
@@ -111,15 +113,14 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
             if (self.showLeft) {
                 self.interactive = YES;
                 
-                [self.leftVC dismissViewControllerAnimated:YES completion:nil];
-                
+                [self dismissLeftView];
             } else {
                 _touchBeganX = [pan locationInView:pan.view].x;
                 
                 if (_touchBeganX < DYLeftSlipLeftSlipPanTriggerWidth) {
                     self.interactive = YES;
                     
-                    [self.coverVC presentViewController:self.leftVC animated:YES completion:nil];
+                    [self showLeftView];
                 }
             }
         }
@@ -212,7 +213,6 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
 }
 
 - (void)animateTransition:(id<UIViewControllerContextTransitioning>)transitionContext {
-    
     if (self.present) {
         // 基础操作，获取两个VC并把视图加在容器上
         UIViewController *toVC = [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
@@ -238,8 +238,7 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
                 [containerView addSubview:fromVC.view];
                 
                 // 加上点击dismiss的View
-                //                [fromVC.view addSubview:self.tapView];
-                
+//                [fromVC.view addSubview:self.tapView];
                 self.showLeft = YES;
             }
         };
@@ -311,7 +310,7 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
         _tapView = [[UIView alloc] initWithFrame:self.coverVC.view.bounds];
         _tapView.backgroundColor = [UIColor colorWithWhite:0 alpha:.2f];
         _tapView.alpha = 0.f;
-        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissLeft)];
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissLeftView)];
         [_tapView addGestureRecognizer:tapGesture];
     }
     return _tapView;
