@@ -85,8 +85,10 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
     [self.coverVC presentViewController:self.leftVC animated:YES completion:nil];
 }
 
-- (void)dismissLeft {
-    [self.leftVC dismissViewControllerAnimated:YES completion:nil];
+- (void)dismissLeftView {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.leftVC dismissViewControllerAnimated:YES completion:nil];
+    });
 }
 
 #pragma mark - private Methods
@@ -149,15 +151,14 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
             if (self.showLeft) {
                 self.interactive = YES;
                 
-                [self.leftVC dismissViewControllerAnimated:YES completion:nil];
-                
+                [self dismissLeftView];
             } else {
                 _touchBeganX = [pan locationInView:pan.view].x;
                 
                 if (_touchBeganX < DYLeftSlipLeftSlipPanTriggerWidth) {
                     self.interactive = YES;
                     
-                    [self.coverVC presentViewController:self.leftVC animated:YES completion:nil];
+                    [self showLeftView];
                 }
             }
         }
@@ -275,8 +276,7 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
                 [containerView addSubview:fromVC.view];
                 
                 // 加上点击dismiss的View
-                //                [fromVC.view addSubview:self.tapView];
-                
+//                [fromVC.view addSubview:self.tapView];
                 self.showLeft = YES;
             }
         };
@@ -348,7 +348,7 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
         _tapView = [[UIView alloc] initWithFrame:self.coverVC.view.bounds];
         _tapView.backgroundColor = [UIColor colorWithWhite:0 alpha:.2f];
         _tapView.alpha = 0.f;
-        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissLeft)];
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissLeftView)];
         [_tapView addGestureRecognizer:tapGesture];
     }
     return _tapView;

@@ -28,4 +28,9 @@
  */
 - (void)showLeftView;
 
+/**
+ *	@brief	取消显示侧滑视图
+ */
+- (void)dismissLeftView;
+
 @end

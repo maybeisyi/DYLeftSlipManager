@@ -7,6 +7,7 @@
 //
 
 #import "LeftTableViewController.h"
+#import "DYLeftSlipManager.h"
 
 @interface LeftTableViewController ()
 
@@ -32,6 +33,10 @@
     cell.textLabel.text = [NSString stringWithFormat:@"%ld",indexPath.row];
     
     return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [[DYLeftSlipManager sharedManager] dismissLeftView];
 }
 
 - (void)dealloc {
