@@ -1,7 +1,7 @@
 //
 //  DYLeftSlipManager.h
 //  DYLeftSlipManager
-//
+//  左滑管理器
 //  Created by daiyi on 2016/11/9.
 //  Copyright © 2016年 DY. All rights reserved.
 //
@@ -10,11 +10,22 @@
 
 @interface DYLeftSlipManager : UIPercentDrivenInteractiveTransition
 
-/// 单例方法
+/**
+ *	@brief	单例方法
+ *  @return instancetype  DYLeftSlipManager左滑管理器实例
+ */
 + (instancetype)sharedManager;
-/// 设置左滑视图及主视图
+
+/**
+ *	@brief	设置左滑视图及主视图
+ *	@param 	leftViewController  左侧菜单视图控制器
+ *	@param 	coverViewController  主控制器
+ */
 - (void)setLeftViewController:(UIViewController *)leftViewController coverViewController:(UIViewController *)coverViewController;
-/// 显示左滑视图
+
+/**
+ *	@brief	显示左滑视图
+ */
 - (void)showLeftView;
 
 @end

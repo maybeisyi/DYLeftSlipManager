@@ -67,8 +67,7 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
     return self;
 }
 
-#pragma mark - 逻辑处理方法
-// 设置左边视图与覆盖视图
+#pragma mark - public Methods
 - (void)setLeftViewController:(UIViewController *)leftViewController coverViewController:(UIViewController *)coverViewController {
     self.leftVC = leftViewController;
     self.coverVC = coverViewController;
@@ -90,10 +89,49 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
     [self.leftVC dismissViewControllerAnimated:YES completion:nil];
 }
 
+#pragma mark - private Methods
+/**
+ *	@brief	是否需要拦截UINavigationController
+ *	@param 	viewController  需要判断的VC
+ *  @return BOOL  YES代表通过拦截，NO代表被拦截
+ */
+- (BOOL)shouldInterceptNaviVC:(UIViewController *)viewController {
+    if ([viewController isKindOfClass:UINavigationController.class]) {
+        UINavigationController *naviVC = (UINavigationController *)viewController;
+        return naviVC.viewControllers.count == 1;
+    }
+    return YES;
+}
+
+/**
+ *	@brief	是否启用Pan手势
+ *  @return BOOL  Pan手势是否可用
+ *  @discussion 防止导航栏push了新视图后，更改右滑手势导致侧滑出菜单
+ */
+- (BOOL)shouldPanGestureEnabled {
+    // 判断self.coverVC是否是UINavigationController
+    BOOL naviAspectResult = [self shouldInterceptNaviVC:self.coverVC];
+    if (!naviAspectResult) {
+        return NO;
+    }
+    
+    // 判断self.coverVC是否是UITabBarController，再判断当前的子控制器是否是UINavigationController
+    if ([self.coverVC isKindOfClass:UITabBarController.class]) {
+        UITabBarController *tabBarVC = (UITabBarController *)self.coverVC;
+        UIViewController *selectVC = tabBarVC.selectedViewController;
+        return [self shouldInterceptNaviVC:selectVC];
+    }
+    
+    return YES;
+}
+
 #pragma mark - 手势处理方法
 - (void)pan:(UIPanGestureRecognizer *)pan {
+    if (![self shouldPanGestureEnabled]) {
+        return;
+    }
+    // X轴偏移
     CGFloat offsetX = [pan translationInView:pan.view].x;
-    
     // X轴速度
     CGFloat velocityX = [pan velocityInView:pan.view].x;
     
@@ -206,13 +244,12 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
     return self.interactive ? self : nil;
 }
 
-#pragma mark - UIViewControllerAnimatedTransitioning
+#pragma mark - UIViewControllerAnimatedTransitioning代理方法
 - (NSTimeInterval)transitionDuration:(id<UIViewControllerContextTransitioning>)transitionContext {
     return .3f;
 }
 
 - (void)animateTransition:(id<UIViewControllerContextTransitioning>)transitionContext {
-    
     if (self.present) {
         // 基础操作，获取两个VC并把视图加在容器上
         UIViewController *toVC = [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
