@@ -1,12 +1,39 @@
 //
 //  DYLeftSlipManager.m
 //  DYLeftSlipManager
-//
+//  左滑管理器
 //  Created by daiyi on 2016/11/9.
 //  Copyright © 2016年 DY. All rights reserved.
 //
 
 #import "DYLeftSlipManager.h"
+#import <objc/runtime.h>
+
+@interface UINavigationController (DYLM_Push)
+
++ (void)swizzlingPushAndPop;
+
+@end
+
+static const void *DYLM_PushStateObserveKey = &DYLM_PushStateObserveKey;
+
+@interface UIScreenEdgePanGestureRecognizer (DYLM_Push)
+
+@property (nonatomic, weak) id stateObserve;
+
+@end
+
+@implementation UIScreenEdgePanGestureRecognizer (DYLM_Push)
+
+- (void)setStateObserve:(id)stateObserve {
+    objc_setAssociatedObject(self, DYLM_PushStateObserveKey, stateObserve, OBJC_ASSOCIATION_ASSIGN);
+}
+
+- (id)stateObserve {
+    return objc_getAssociatedObject(self, DYLM_PushStateObserveKey);
+}
+
+@end
 
 // 单例对象
 static DYLeftSlipManager *_leftSlipManager = nil;
@@ -14,7 +41,6 @@ static DYLeftSlipManager *_leftSlipManager = nil;
 CGFloat const DYLeftSlipCriticalVelocity = 800;
 // 左滑手势触发距离
 CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
-
 
 @interface DYLeftSlipManager ()<UIViewControllerAnimatedTransitioning, UIViewControllerTransitioningDelegate>
 /** 用来左滑手势开始判断 */
@@ -32,6 +58,11 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
 
 @property (nonatomic, strong) UIViewController *leftVC;
 @property (nonatomic, weak) UIViewController *coverVC;
+
+/** 侧滑手势 */
+@property (nonatomic, strong) UIPanGestureRecognizer *panGesture;
+
+/** 待处理的navigationController */
 
 @end
 
@@ -77,8 +108,9 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
     // 转场代理
     self.leftVC.transitioningDelegate = self;
     // 侧滑手势
-    UIPanGestureRecognizer *pan = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(pan:)];
-    [self.coverVC.view addGestureRecognizer:pan];
+    [self.coverVC.view addGestureRecognizer:self.panGesture];
+    
+    [UINavigationController swizzlingPushAndPop];
 }
 
 - (void)showLeftView {
@@ -92,6 +124,14 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
 }
 
 #pragma mark - private Methods
+/**
+ *	@brief	设置滑动手势是否可用
+ *	@param 	enabled 可用状态
+ */
+- (void)setGestureEnabled:(BOOL)enabled {
+    self.panGesture.enabled = enabled;
+}
+
 /**
  *	@brief	是否需要拦截UINavigationController
  *	@param 	viewController  需要判断的VC
@@ -130,6 +170,7 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
 #pragma mark - 手势处理方法
 - (void)pan:(UIPanGestureRecognizer *)pan {
     if (![self shouldPanGestureEnabled]) {
+        [self setGestureEnabled:NO];
         return;
     }
     // X轴偏移
@@ -261,6 +302,9 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
         [containerView addSubview:toVC.view];
         [containerView sendSubviewToBack:toVC.view];
         
+        // 将tapView提前，防止pop回来将tabbar提前
+        [self.tapView.superview bringSubviewToFront:self.tapView];
+        
         // 动画block
         void(^animateBlock)() = ^{
             fromVC.view.frame = CGRectMake(self.leftViewWidth, 0, fromVC.view.frame.size.width, fromVC.view.frame.size.height);
@@ -290,16 +334,13 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
                 completeBlock();
             }];
         } else {
-            
             [UIView animateWithDuration:[self transitionDuration:transitionContext] animations:^{
                 animateBlock();
             } completion:^(BOOL finished) {
                 completeBlock();
             }];
-            
         }
     } else {
-        
         UIViewController *toVC = [transitionContext viewControllerForKey:UITransitionContextToViewControllerKey];
         
         UIView *containerView = [transitionContext containerView];
@@ -324,7 +365,6 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
             }
         };
         
-        
         if (self.interactive) {
             // 呵呵🙃
             [UIView animateWithDuration:[self transitionDuration:transitionContext] delay:0 options:UIViewAnimationOptionCurveLinear animations:^{
@@ -342,6 +382,34 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
     }
 }
 
+#pragma mark - KVO Methods
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context {
+    if (![keyPath isEqualToString:@"state"]) {
+        return;
+    }
+    
+    UIGestureRecognizerState state = [change[@"new"] integerValue];
+    if (state == UIGestureRecognizerStateEnded
+        || state == UIGestureRecognizerStateCancelled
+        || state == UIGestureRecognizerStateFailed) {
+        
+        UINavigationController *naviVC = (__bridge UINavigationController *)(context);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self setGestureEnabled:naviVC.viewControllers.count == 1];
+            if (naviVC.viewControllers.count == 1) {
+                UIScreenEdgePanGestureRecognizer *gesture = (UIScreenEdgePanGestureRecognizer *)object;
+                // 关闭导航栏侧滑手势
+                gesture.enabled = NO;
+                // 去除手势观察者
+                if (gesture.stateObserve) {
+                    [object removeObserver:self forKeyPath:keyPath];
+                    [gesture setStateObserve:nil];
+                }
+            }
+        });
+    }
+}
+
 #pragma mark - setter/getter方法
 - (UIView *)tapView {
     if (!_tapView) {
@@ -352,6 +420,95 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
         [_tapView addGestureRecognizer:tapGesture];
     }
     return _tapView;
+}
+
+- (UIPanGestureRecognizer *)panGesture {
+    if (!_panGesture) {
+        _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(pan:)];
+    }
+    return _panGesture;
+}
+
+@end
+
+/**
+ 动态交换方法
+ 
+ @param class 需要交换的类
+ @param sourceSelector 原始方法
+ @param customSelector 交换方法
+ */
+static inline void swizzlingInstanceMethods(Class class, SEL sourceSelector, SEL customSelector) {
+    Method sourceMethod = class_getInstanceMethod(class, sourceSelector);
+    Method customMethod = class_getInstanceMethod(class, customSelector);
+    
+    if (class_addMethod(class, sourceSelector, method_getImplementation(customMethod), method_getTypeEncoding(customMethod))) {
+        class_replaceMethod(class, customSelector, method_getImplementation(sourceMethod), method_getTypeEncoding(sourceMethod));
+    } else {
+        method_exchangeImplementations(sourceMethod, customMethod);
+    }
+}
+
+@implementation UINavigationController (DYLM_Push)
+
++ (void)swizzlingPushAndPop {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        swizzlingInstanceMethods(self, @selector(pushViewController:animated:), @selector(DYL_pushViewController:animated:));
+        swizzlingInstanceMethods(self, @selector(popViewControllerAnimated:), @selector(DYL_popViewControllerAnimated:));
+        swizzlingInstanceMethods(self, @selector(popToViewController:animated:), @selector(DYL_popToViewController:animated:));
+        swizzlingInstanceMethods(self, @selector(popToRootViewControllerAnimated:), @selector(DYL_popToRootViewControllerAnimated:));
+    });
+}
+
+- (void)DYL_pushViewController:(UIViewController *)viewController animated:(BOOL)animated {\
+    [self DYL_pushViewController:viewController animated:animated];
+
+    [[DYLeftSlipManager sharedManager] setGestureEnabled:self.viewControllers.count == 1];
+    // 该navigationController的全屏滑动手势
+    UIScreenEdgePanGestureRecognizer *interactivePopGestureRecognizer = (UIScreenEdgePanGestureRecognizer *)self.interactivePopGestureRecognizer;
+    
+    if (!interactivePopGestureRecognizer.stateObserve) {
+        // 监听手势的状态
+        [interactivePopGestureRecognizer addObserver:[DYLeftSlipManager sharedManager] forKeyPath:@"state" options:NSKeyValueObservingOptionNew context:(__bridge void * _Nullable)(self)];
+        [interactivePopGestureRecognizer setStateObserve:[DYLeftSlipManager sharedManager]];
+    }
+    
+    if (self.viewControllers.count > 1) {
+        // 开启导航栏手势交互
+        interactivePopGestureRecognizer.enabled = YES;
+    }
+    /**********************************************************************************************/
+//    // 手势执行的target
+//    id gestureRecognizerTarget = ((NSArray *)[interactivePopGestureRecognizer valueForKey:@"_targets"]).firstObject;
+//    // 执行handleNavigationTransition:的私有对象
+//    id navigationInteractiveTransition = [gestureRecognizerTarget valueForKeyPath:@"_target"];
+//    _target = navigationInteractiveTransition;
+    /**********************************************************************************************/
+}
+
+- (UIViewController *)DYL_popViewControllerAnimated:(BOOL)animated {
+    UIViewController *viewController = [self DYL_popViewControllerAnimated:animated];
+    if (viewController) {
+        [[DYLeftSlipManager sharedManager] setGestureEnabled:self.viewControllers.count == 1];
+    } else {
+        UIScreenEdgePanGestureRecognizer *interactivePopGestureRecognizer = (UIScreenEdgePanGestureRecognizer *)self.interactivePopGestureRecognizer;
+        interactivePopGestureRecognizer.enabled = NO;
+    }
+
+    return viewController;
+}
+
+- (NSArray<__kindof UIViewController *> *)DYL_popToViewController:(UIViewController *)viewController animated:(BOOL)animated {
+    NSArray<__kindof UIViewController *> *vcArray = [self DYL_popToViewController:viewController animated:animated];
+    [[DYLeftSlipManager sharedManager] setGestureEnabled:self.viewControllers.count == 1];
+    return vcArray;
+}
+
+- (NSArray<__kindof UIViewController *> *)DYL_popToRootViewControllerAnimated:(BOOL)animated {
+    NSArray<__kindof UIViewController *> *vcArray = [self DYL_popToRootViewControllerAnimated:animated];
+    [[DYLeftSlipManager sharedManager] setGestureEnabled:self.viewControllers.count == 1];
+    return vcArray;
 }
 
 @end

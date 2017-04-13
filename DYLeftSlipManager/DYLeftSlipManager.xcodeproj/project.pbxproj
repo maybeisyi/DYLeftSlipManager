@@ -16,6 +16,7 @@
 		AF3E37D01DD36D620092B574 /* DYLeftSlipManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AF3E37CF1DD36D620092B574 /* DYLeftSlipManager.m */; };
 		AF3E37D31DD36E400092B574 /* TabbarController.m in Sources */ = {isa = PBXBuildFile; fileRef = AF3E37D21DD36E400092B574 /* TabbarController.m */; };
 		AF3E37D61DD36E580092B574 /* LeftTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AF3E37D51DD36E580092B574 /* LeftTableViewController.m */; };
+		AFCBCEAD1E9DFA0B00527A5D /* BaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = AFCBCEAC1E9DFA0B00527A5D /* BaseViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,8 @@
 		AF3E37D21DD36E400092B574 /* TabbarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TabbarController.m; sourceTree = "<group>"; };
 		AF3E37D41DD36E580092B574 /* LeftTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeftTableViewController.h; sourceTree = "<group>"; };
 		AF3E37D51DD36E580092B574 /* LeftTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeftTableViewController.m; sourceTree = "<group>"; };
+		AFCBCEAB1E9DFA0B00527A5D /* BaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseViewController.h; sourceTree = "<group>"; };
+		AFCBCEAC1E9DFA0B00527A5D /* BaseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +84,8 @@
 				AF3E37C41DD36D1A0092B574 /* LaunchScreen.storyboard */,
 				AF3E37C71DD36D1A0092B574 /* Info.plist */,
 				AF3E37B61DD36D1A0092B574 /* Supporting Files */,
+				AFCBCEAB1E9DFA0B00527A5D /* BaseViewController.h */,
+				AFCBCEAC1E9DFA0B00527A5D /* BaseViewController.m */,
 			);
 			path = DYLeftSlipManager;
 			sourceTree = "<group>";
@@ -179,6 +184,7 @@
 				AF3E37BB1DD36D1A0092B574 /* AppDelegate.m in Sources */,
 				AF3E37D31DD36E400092B574 /* TabbarController.m in Sources */,
 				AF3E37D61DD36E580092B574 /* LeftTableViewController.m in Sources */,
+				AFCBCEAD1E9DFA0B00527A5D /* BaseViewController.m in Sources */,
 				AF3E37B81DD36D1A0092B574 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
