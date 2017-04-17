@@ -458,6 +458,7 @@ static inline void swizzlingInstanceMethods(Class class, SEL sourceSelector, SEL
         swizzlingInstanceMethods(self, @selector(popViewControllerAnimated:), @selector(DYL_popViewControllerAnimated:));
         swizzlingInstanceMethods(self, @selector(popToViewController:animated:), @selector(DYL_popToViewController:animated:));
         swizzlingInstanceMethods(self, @selector(popToRootViewControllerAnimated:), @selector(DYL_popToRootViewControllerAnimated:));
+        swizzlingInstanceMethods(self, NSSelectorFromString(@"dealloc"), @selector(DYL_dealloc));
     });
 }
 
@@ -509,6 +510,17 @@ static inline void swizzlingInstanceMethods(Class class, SEL sourceSelector, SEL
     NSArray<__kindof UIViewController *> *vcArray = [self DYL_popToRootViewControllerAnimated:animated];
     [[DYLeftSlipManager sharedManager] setGestureEnabled:self.viewControllers.count == 1];
     return vcArray;
+}
+
+- (void)DYL_dealloc {
+    // 该navigationController的全屏滑动手势
+    UIScreenEdgePanGestureRecognizer *interactivePopGestureRecognizer = (UIScreenEdgePanGestureRecognizer *)self.interactivePopGestureRecognizer;
+    // 移除KVO监听
+    if (interactivePopGestureRecognizer.stateObserve) {
+        [interactivePopGestureRecognizer removeObserver:interactivePopGestureRecognizer.stateObserve forKeyPath:@"state"];
+    }
+    
+    [self DYL_dealloc];
 }
 
 @end
