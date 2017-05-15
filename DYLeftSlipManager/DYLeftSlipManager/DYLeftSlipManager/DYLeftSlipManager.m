@@ -42,9 +42,7 @@ CGFloat const DYLeftSlipCriticalVelocity = 800;
 // 左滑手势触发距离
 CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
 
-@interface DYLeftSlipManager ()<UIViewControllerAnimatedTransitioning, UIViewControllerTransitioningDelegate>
-/** 用来左滑手势开始判断 */
-@property (nonatomic, assign) CGFloat touchBeganX;
+@interface DYLeftSlipManager ()<UIViewControllerAnimatedTransitioning, UIViewControllerTransitioningDelegate, UIGestureRecognizerDelegate>
 /** 是否已经显示左滑视图 */
 @property (nonatomic, assign) BOOL showLeft;
 /** 点击返回的遮罩view */
@@ -189,18 +187,11 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
     switch (pan.state) {
         case UIGestureRecognizerStateBegan:
         {
+            self.interactive = YES;
             if (self.showLeft) {
-                self.interactive = YES;
-                
                 [self dismissLeftView];
             } else {
-                _touchBeganX = [pan locationInView:pan.view].x;
-                
-                if (_touchBeganX < DYLeftSlipLeftSlipPanTriggerWidth) {
-                    self.interactive = YES;
-                    
-                    [self showLeftView];
-                }
+                [self showLeftView];
             }
         }
             break;
@@ -265,6 +256,25 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
         default:
             break;
     }
+}
+
+#pragma mark - UIGestureRecognizerDelegate Methods
+- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    UIPanGestureRecognizer *panGesture = (UIPanGestureRecognizer *)gestureRecognizer;
+    
+    // 忽略起始点不在左侧触发范围内的手势
+    CGFloat touchBeganX = [panGesture locationInView:panGesture.view].x;
+    if (touchBeganX > DYLeftSlipLeftSlipPanTriggerWidth) {
+        return NO;
+    }
+    
+    // 忽略反向手势
+    CGPoint translation = [panGesture translationInView:panGesture.view];
+    if (translation.x <= 0) {
+        return NO;
+    }
+    
+    return YES;
 }
 
 #pragma mark - UIViewControllerTransitioningDelegate代理方法
@@ -425,6 +435,7 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
 - (UIPanGestureRecognizer *)panGesture {
     if (!_panGesture) {
         _panGesture = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(pan:)];
+        _panGesture.delegate = self;
     }
     return _panGesture;
 }
