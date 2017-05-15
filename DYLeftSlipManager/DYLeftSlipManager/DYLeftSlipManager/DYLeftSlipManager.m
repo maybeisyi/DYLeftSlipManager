@@ -260,6 +260,10 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
 
 #pragma mark - UIGestureRecognizerDelegate Methods
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    if (self.showLeft) {
+        return YES;
+    }
+    
     UIPanGestureRecognizer *panGesture = (UIPanGestureRecognizer *)gestureRecognizer;
     
     // 忽略起始点不在左侧触发范围内的手势
