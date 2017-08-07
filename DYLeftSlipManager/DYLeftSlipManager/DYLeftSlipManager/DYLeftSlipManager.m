@@ -477,10 +477,25 @@ static inline void swizzlingInstanceMethods(Class class, SEL sourceSelector, SEL
     });
 }
 
+- (BOOL)shouldRefreshDYLMGesture {
+    return self.presentingViewController == nil;
+}
+
+- (void)refreshDYLMGestureEnabled {
+    if ([self shouldRefreshDYLMGesture]) {
+        [[DYLeftSlipManager sharedManager] setGestureEnabled:self.viewControllers.count == 1];
+    }
+}
+
 - (void)DYL_pushViewController:(UIViewController *)viewController animated:(BOOL)animated {\
     [self DYL_pushViewController:viewController animated:animated];
-
-    [[DYLeftSlipManager sharedManager] setGestureEnabled:self.viewControllers.count == 1];
+    // 判断是否需要刷新侧滑菜单的手势，在第一次被present出来的时候，self.presentingViewController为nil，此时必须依靠self.viewControllers.count进行判断是否是present出来
+    if (![self shouldRefreshDYLMGesture] || self.viewControllers.count == 1) {
+        return;
+    }
+    
+    [self refreshDYLMGestureEnabled];
+    
     // 该navigationController的全屏滑动手势
     UIScreenEdgePanGestureRecognizer *interactivePopGestureRecognizer = (UIScreenEdgePanGestureRecognizer *)self.interactivePopGestureRecognizer;
     
@@ -505,25 +520,37 @@ static inline void swizzlingInstanceMethods(Class class, SEL sourceSelector, SEL
 
 - (UIViewController *)DYL_popViewControllerAnimated:(BOOL)animated {
     UIViewController *viewController = [self DYL_popViewControllerAnimated:animated];
-    if (viewController) {
-        [[DYLeftSlipManager sharedManager] setGestureEnabled:self.viewControllers.count == 1];
-    } else {
-        UIScreenEdgePanGestureRecognizer *interactivePopGestureRecognizer = (UIScreenEdgePanGestureRecognizer *)self.interactivePopGestureRecognizer;
-        interactivePopGestureRecognizer.enabled = NO;
+    
+    // 判断是否需要刷新侧滑菜单的手势
+    if ([self shouldRefreshDYLMGesture]) {
+        if (viewController) {
+            [self refreshDYLMGestureEnabled];
+        } else {
+            UIScreenEdgePanGestureRecognizer *interactivePopGestureRecognizer = (UIScreenEdgePanGestureRecognizer *)self.interactivePopGestureRecognizer;
+            interactivePopGestureRecognizer.enabled = NO;
+        }
     }
-
+    
     return viewController;
 }
 
 - (NSArray<__kindof UIViewController *> *)DYL_popToViewController:(UIViewController *)viewController animated:(BOOL)animated {
     NSArray<__kindof UIViewController *> *vcArray = [self DYL_popToViewController:viewController animated:animated];
-    [[DYLeftSlipManager sharedManager] setGestureEnabled:self.viewControllers.count == 1];
+    
+    // 判断是否需要刷新侧滑菜单的手势
+    if ([self shouldRefreshDYLMGesture]) {
+        [self refreshDYLMGestureEnabled];
+    }
+    
     return vcArray;
 }
 
 - (NSArray<__kindof UIViewController *> *)DYL_popToRootViewControllerAnimated:(BOOL)animated {
     NSArray<__kindof UIViewController *> *vcArray = [self DYL_popToRootViewControllerAnimated:animated];
-    [[DYLeftSlipManager sharedManager] setGestureEnabled:self.viewControllers.count == 1];
+    // 判断是否需要刷新侧滑菜单的手势
+    if ([self shouldRefreshDYLMGesture]) {
+        [self refreshDYLMGestureEnabled];
+    }
     return vcArray;
 }
 

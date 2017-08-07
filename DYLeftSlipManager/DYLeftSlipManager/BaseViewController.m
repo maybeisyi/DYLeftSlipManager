@@ -18,7 +18,7 @@
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor brownColor];
         
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"asdasd" style:UIBarButtonItemStyleDone target:self action:@selector(popAction)];
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"myBack" style:UIBarButtonItemStyleDone target:self action:@selector(popAction)];
     self.navigationController.interactivePopGestureRecognizer.enabled = YES;
     self.navigationController.interactivePopGestureRecognizer.delegate = self;
     
@@ -26,6 +26,12 @@
     [btn setTitle:@"点我再push一个页面" forState:UIControlStateNormal];
     [btn addTarget:self action:@selector(pushAction) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:btn];
+    
+    
+    UIButton *dismissbBtn = [[UIButton alloc] initWithFrame:CGRectMake(0, 200, self.view.frame.size.width, 100)];
+    [dismissbBtn setTitle:@"dismiss整个导航栏" forState:UIControlStateNormal];
+    [dismissbBtn addTarget:self action:@selector(dismissAction) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:dismissbBtn];
 }
 
 - (void)popAction {
@@ -34,6 +40,12 @@
 
 - (void)pushAction {
     [self.navigationController pushViewController:[self.class new] animated:YES];
+}
+
+- (void)dismissAction {
+    [self.navigationController dismissViewControllerAnimated:YES completion:^{
+        
+    }];
 }
 
 @end

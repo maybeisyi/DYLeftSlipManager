@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12118" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="XP1-YH-hJE">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12120" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="XP1-YH-hJE">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12086"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -21,26 +21,36 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2Fa-bK-jyo">
-                                <rect key="frame" x="31" y="60" width="173" height="152"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2Fa-bK-jyo">
+                                <rect key="frame" x="111" y="100" width="153" height="30"/>
                                 <state key="normal" title="点我左滑或者手势左滑"/>
                                 <connections>
                                     <action selector="click:" destination="BYZ-38-t0r" eventType="touchUpInside" id="JG2-NM-yjI"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="N5O-qv-rM4">
-                                <rect key="frame" x="124.5" y="318.5" width="126" height="30"/>
+                                <rect key="frame" x="124.5" y="230" width="126" height="30"/>
                                 <state key="normal" title="点我push一个出来"/>
                                 <connections>
                                     <action selector="pushAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="lCD-wz-S3c"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qZH-eO-Cmx">
+                                <rect key="frame" x="123" y="360" width="129" height="30"/>
+                                <state key="normal" title="present一个导航栏"/>
+                                <connections>
+                                    <action selector="presentAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="XfK-EN-Z9O"/>
                                 </connections>
                             </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="N5O-qv-rM4" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="4ZV-KF-XDn"/>
-                            <constraint firstItem="N5O-qv-rM4" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="g4e-8R-g07"/>
+                            <constraint firstItem="2Fa-bK-jyo" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="4l1-z1-pfU"/>
+                            <constraint firstItem="qZH-eO-Cmx" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="NXL-wa-9By"/>
+                            <constraint firstItem="N5O-qv-rM4" firstAttribute="top" secondItem="2Fa-bK-jyo" secondAttribute="bottom" constant="100" id="gdx-y1-q1M"/>
+                            <constraint firstItem="qZH-eO-Cmx" firstAttribute="top" secondItem="N5O-qv-rM4" secondAttribute="bottom" constant="100" id="ngQ-EO-A8x"/>
+                            <constraint firstItem="2Fa-bK-jyo" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="100" id="yZk-ve-tYf"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="xGy-c1-wvl"/>

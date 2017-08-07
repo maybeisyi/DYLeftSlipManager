@@ -35,4 +35,14 @@
     [self.navigationController pushViewController:vc animated:YES];
 }
 
+- (IBAction)presentAction:(UIButton *)sender {
+    
+    BaseViewController *vc = [[BaseViewController alloc] init];
+    UINavigationController *naviVC = [[UINavigationController alloc] initWithRootViewController:vc];
+    [self presentViewController:naviVC animated:YES completion:^{
+        
+    }];
+}
+
+
 @end
