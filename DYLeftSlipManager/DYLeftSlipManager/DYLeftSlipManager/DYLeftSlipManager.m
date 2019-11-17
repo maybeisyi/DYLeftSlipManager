@@ -112,6 +112,7 @@ CGFloat const DYLeftSlipLeftSlipPanTriggerWidth = 50;
 }
 
 - (void)showLeftView {
+    self.leftVC.modalPresentationStyle = UIModalPresentationFullScreen;
     [self.coverVC presentViewController:self.leftVC animated:YES completion:nil];
 }
 
